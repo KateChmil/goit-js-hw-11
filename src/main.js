@@ -4,14 +4,12 @@ import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
 import { fetchImages } from "./js/pixabay-api.js";
+import { clearGallery, toggleLoader, renderGallery } from "./js/render-functions.js"
 
 const searchForm = document.querySelector("#search-form");
 const sInput = document.querySelector("#search-input");
-const loader = document.querySelector("#toggle-div");
-const gallery = document.querySelector("#gallery");
 
-const APIKEY = "47458933-146f1ea8ad921328f8e999f88";
-const BASEURL = "https://pixabay.com/api/";
+
 
 const lightbox = new SimpleLightbox("#gallery a", {
   captionsData: "alt",
@@ -29,40 +27,28 @@ searchForm.addEventListener("submit", (event) => {
     clearGallery();
     toggleLoader(true);
 
-    fetchImages(request);
-})    
+   fetchImages(request) 
+      .then((data) => {
+    toggleLoader(false);
+    if (!data.hits.length) {
+              iziToast.warning({
+          title: "No Results",
+          message: "Sorry, there are no images matching your search query. Please try again!",
+        });
+        return;}
+          
+        renderGallery(data.hits)
+        lightbox.refresh();         
+    })
+      .catch((error) => {
+    toggleLoader(false);
+    iziToast.error({ title: "Error", message: "Something went wrong. Please try again later." });
+    });
+})
+    
 
 
 
 
 
 
-function renderGallery(images) {
-    const markup = images
-        .map(
-            ({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
-                return `
-                 <li> <a href="${largeImageURL}">
-                <img src="${webformatURL}" alt="${tags}"/>
-                </a>
-                <div class = "info">
-                <div class="info-div"> <p class="section"> Likes: </p> <p class="result" > ${likes} </p> </div>
-                <div class="info-div"> <p class="section"> Views: </p> <p class="result"> ${views} </p> </div>
-                <div class="info-div"> <p class="section"> Comments: </p> <p class="result"> ${comments} </p> </div>
-                <div class="info-div"> <p class="section"> Downloads: </p> <p class="result"> ${downloads} </p> </div>
-                 </div>
-                </li>
-               `
-            }
-    )
-        .join("")
-    gallery.insertAdjacentHTML("beforeend", markup);
-}
-
-function clearGallery() {
-    gallery.innerHTML = "";
-}
-
-function toggleLoader(show) {
-    loader.classList.toggle("hidden", !show)
-}
