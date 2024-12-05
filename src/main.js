@@ -3,6 +3,8 @@ import "izitoast/dist/css/iziToast.min.css";
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 
+import { fetchImages } from "./js/pixabay-api.js";
+
 const searchForm = document.querySelector("#search-form");
 const sInput = document.querySelector("#search-input");
 const loader = document.querySelector("#toggle-div");
